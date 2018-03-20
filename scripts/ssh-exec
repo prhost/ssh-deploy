@@ -1,0 +1,57 @@
+#!/bin/sh
+
+eval $(ssh-agent -s) > /dev/null
+mkdir -p ~/.ssh
+
+if [ -z "$HOST" ] ; then echo 'ERROR - missing variable HOST' && exit 1 ; fi
+echo "HOST: $HOST"
+
+if [ -z "$SSHKEY_PRIVATE" ] ; then echo 'ERROR - missing variable SSHKEY_PRIVATE' && exit 1 ; fi
+
+if [ -z "$USER_HOST" ] ; then echo 'ERROR - missing variable USER_HOST' && exit 1 ; fi
+echo "USER_HOST: $USER_HOST"
+
+if [ -z "$EXEC_SCRIPT" ] ; then echo 'ERROR - missing host (EXEC_SCRIPT) option' && exit 1 ; fi
+echo "EXEC_SCRIPT: $EXEC_SCRIPT"
+
+remote_user="$USER_HOST"
+echo "remote_user: $remote_user"
+
+remote_port="22"
+if [ -n "$PORT" ];then
+    remote_port="$PORT"
+fi
+echo "remote_port: $remote_port"
+
+ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
+ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
+
+FILE_SSHKEY_PRIVATE=~/.ssh/ssh_key_private.key
+echo "FILE_SSHKEY_PRIVATE: $FILE_SSHKEY_PRIVATE"
+
+echo "$SSHKEY_PRIVATE" > $FILE_SSHKEY_PRIVATE
+
+if [ ! -f $FILE_SSHKEY_PRIVATE ]; then
+    echo "ERROR - file $FILE_SSHKEY_PRIVATE not found."
+    exit 1;
+fi
+
+#set permission
+chmod 0600 "$FILE_SSHKEY_PRIVATE"
+
+#add key
+ssh-add $FILE_SSHKEY_PRIVATE
+
+# host option
+if [ -z "$EXEC_SCRIPT" ]; then
+    echo 'ERROR - missing host (EXEC_SCRIPT) option'
+    exit 1
+fi
+
+DEPLOY_SSH="ssh $HOST -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p $remote_port -l $remote_user -i $FILE_SSHKEY_PRIVATE"
+
+echo "Running command in $DIRECTORY: $EXEC_SCRIPT"
+
+$DEPLOY_SSH "(cd $DIRECTORY && $EXEC_SCRIPT)"
+
+rm -rf $FILE_SSHKEY_PRIVATE
