@@ -26,21 +26,21 @@ echo "remote_port: $remote_port"
 ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
 ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
 
-FILE_SSHKEY_PRIVATE=~/.ssh/ssh_key_private.key
-echo "FILE_SSHKEY_PRIVATE: $FILE_SSHKEY_PRIVATE"
+#FILE_SSHKEY_PRIVATE=~/.ssh/ssh_key_private.key
+#echo "FILE_SSHKEY_PRIVATE: $FILE_SSHKEY_PRIVATE"
 
-echo "$SSHKEY_PRIVATE" > $FILE_SSHKEY_PRIVATE
+#echo "$SSHKEY_PRIVATE" > $FILE_SSHKEY_PRIVATE
 
-if [ ! -f $FILE_SSHKEY_PRIVATE ]; then
-    echo "ERROR - file $FILE_SSHKEY_PRIVATE not found."
-    exit 1;
-fi
+#if [ ! -f $FILE_SSHKEY_PRIVATE ]; then
+#    echo "ERROR - file $FILE_SSHKEY_PRIVATE not found."
+#    exit 1;
+#fi
 
 #set permission
-chmod 0600 "$FILE_SSHKEY_PRIVATE"
+#chmod 0600 "$FILE_SSHKEY_PRIVATE"
 
 #add key
-ssh-add $FILE_SSHKEY_PRIVATE
+echo "$SSHKEY_PRIVATE" | tr -d '\r' | ssh-add - > /dev/null
 
 # host option
 if [ -z "$EXEC_SCRIPT" ]; then
@@ -48,10 +48,10 @@ if [ -z "$EXEC_SCRIPT" ]; then
     exit 1
 fi
 
-DEPLOY_SSH="ssh $HOST -t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p $remote_port -l $remote_user -i $FILE_SSHKEY_PRIVATE"
+DEPLOY_SSH="ssh $HOST -tt -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p $remote_port -l $remote_user"
 
 echo "Running command in $DIRECTORY: $EXEC_SCRIPT"
 
 $DEPLOY_SSH "(cd $DIRECTORY && $EXEC_SCRIPT)"
 
-rm -rf $FILE_SSHKEY_PRIVATE
+#rm -rf $FILE_SSHKEY_PRIVATE
