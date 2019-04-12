@@ -108,7 +108,7 @@ ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
 ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
 
 echolor -C "Executando Rsync...\n"
-echolor -C "rsync --itemize-changes $delete $files_from $exclude_from --rsh=$rsync_command $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
+echolor -C "rsync $custom_param --itemize-changes $delete $files_from $exclude_from --rsh=$rsync_command $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
 sync_output=$(rsync $custom_param --itemize-changes $delete $files_from $exclude_from --rsh="$rsync_command" "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
 
 if [ "$?" = "0" ]; then
