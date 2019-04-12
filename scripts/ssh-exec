@@ -17,6 +17,11 @@ echo "EXEC_SCRIPT: $EXEC_SCRIPT"
 remote_user="$USER_HOST"
 echo "remote_user: $remote_user"
 
+custom_param="-tt"
+if [ -n "$CUSTOM_PARAMETER" ];then
+    custom_param="$CUSTOM_PARAMETER"
+fi
+
 remote_port="22"
 if [ -n "$PORT" ];then
     remote_port="$PORT"
@@ -48,7 +53,7 @@ if [ -z "$EXEC_SCRIPT" ]; then
     exit 1
 fi
 
-DEPLOY_SSH="ssh $HOST -tt -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p $remote_port -l $remote_user -i $FILE_SSHKEY_PRIVATE"
+DEPLOY_SSH="ssh $HOST $custom_param -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p $remote_port -l $remote_user -i $FILE_SSHKEY_PRIVATE"
 
 echo "Running command ($EXEC_SCRIPT) from the directory ($DIRECTORY)"
 
