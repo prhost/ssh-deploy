@@ -38,10 +38,16 @@ then
     exit 1
 fi
 
-custom_param="-razvplhHP"
-if [ -n "$CUSTOM_PARAMETER" ];then
-    custom_param="$CUSTOM_PARAMETER"
-    echo "custom_param: $custom_param"
+rsync_custom_param="-razvplhHP"
+if [ -n "$RSYNC_CUSTOM_PARAMETER" ];then
+    rsync_custom_param="$RSYNC_CUSTOM_PARAMETER"
+    echo "RSYNC custom paramenters: $rsync_custom_param"
+fi
+
+ssh_custom_param="-t -T -o BatchMode=yes -o StrictHostKeyChecking=no"
+if [ -n "$SSH_CUSTOM_PARAMETER" ];then
+    ssh_custom_param="$SSH_CUSTOM_PARAMETER"
+    echo "SSH custom paramenters: $ssh_custom_param"
 fi
 
 HTTP_DIRECTORY="http://$HOST/"
@@ -67,7 +73,7 @@ echo "remote_port: $remote_port"
 
 echolor -C "remote_port: $remote_port"
 
-rsync_command="ssh -l $USER_HOST -t -o BatchMode=yes -o StrictHostKeyChecking=no -p $remote_port -i $FILE_SSHKEY_PRIVATE"
+rsync_command="ssh -l $USER_HOST $ssh_custom_param -p $remote_port -i $FILE_SSHKEY_PRIVATE"
 echolor -C "rsync_command: $rsync_command"
 
 echolor -C "SOURCE_DIR: $SOURCE_DIR"
@@ -108,8 +114,8 @@ ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
 ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
 
 echolor -C "Executando Rsync...\n"
-echolor -C "rsync $custom_param --itemize-changes $delete $files_from $exclude_from --rsh=$rsync_command $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
-sync_output=$(rsync $custom_param --itemize-changes $delete $files_from $exclude_from --rsh="$rsync_command" "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
+echolor -C "rsync $rsync_custom_param --itemize-changes $delete $files_from $exclude_from --rsh=$rsync_command $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
+sync_output=$(rsync $rsync_custom_param --itemize-changes $delete $files_from $exclude_from --rsh="$rsync_command" "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
 
 if [ "$?" = "0" ]; then
     echolor -G "Success - finished rsync synchronisation"
