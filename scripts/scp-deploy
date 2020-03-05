@@ -38,18 +38,6 @@ then
     exit 1
 fi
 
-rsync_custom_param="-razvplhHP"
-if [ -n "$RSYNC_CUSTOM_PARAMETER" ];then
-    rsync_custom_param="$RSYNC_CUSTOM_PARAMETER"
-    echo "RSYNC custom paramenters: $rsync_custom_param"
-fi
-
-ssh_custom_param="-t -T -o BatchMode=yes -o StrictHostKeyChecking=no"
-if [ -n "$SSH_CUSTOM_PARAMETER" ];then
-    ssh_custom_param="$SSH_CUSTOM_PARAMETER"
-    echo "SSH custom paramenters: $ssh_custom_param"
-fi
-
 HTTP_DIRECTORY="http://$HOST/"
 
 FILE_SSHKEY_PRIVATE=~/.ssh/ssh_key_private.key
@@ -70,8 +58,11 @@ if [ -n "$PORT" ];then
 fi
 echolor -C "remote_port: $remote_port"
 
-rsync_command="ssh -l $USER_HOST $ssh_custom_param -p $remote_port -i $FILE_SSHKEY_PRIVATE"
-echolor -C "rsync_command: $rsync_command"
+ssh_custom_param="-o stricthostkeychecking=no -r -P $remote_port -i $FILE_SSHKEY_PRIVATE"
+if [ -n "$SSH_CUSTOM_PARAMETER" ];then
+    ssh_custom_param="$SSH_CUSTOM_PARAMETER"
+    echo "SSH custom paramenters: $ssh_custom_param"
+fi
 
 echolor -C "SOURCE_DIR: $SOURCE_DIR"
 if [ -z "$SOURCE_DIR" ];then
@@ -86,40 +77,20 @@ echo ""
 
 SOURCE_DIR="$SOURCE_DIR/"
 
-exclude_from=""
-if [ -n "$IGNORE_FILES" ];then
-    echolor -C "Ignorando arquivos: $IGNORE_FILES\n"
-    echo "$IGNORE_FILES" | tr " " "\n" >> /tmp/exclude_from.txt
-    exclude_from="--exclude-from=/tmp/exclude_from.txt"
-fi
-
-delete=""
-if [ "$DELETE" = "true" ];then
-    echolor -C "Habilitado delete (--delete-during)\n\n"
-    delete="--delete --delete-during"
-fi
-
-files_from=""
-if [ -n "$FILES" ];then
-    echolor -C "Arquivos selecionados: $FILES\n"
-    echo "$FILES" | tr " " "\n" >> /tmp/files_from.txt
-    files_from="--files-from=/tmp/files_from.txt"
-fi
-
 echolor -C "Adicionando chaves no known_hosts...\n"
 ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
 ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
 
-echolor -C "Executando Rsync...\n"
-echolor -C "rsync $rsync_custom_param --itemize-changes $delete $files_from $exclude_from --rsh='$rsync_command' $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
-sync_output=$(rsync $rsync_custom_param --itemize-changes $delete $files_from $exclude_from --rsh="$rsync_command" "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
+echolor -C "Run Scp...\n"
+echolor -C "scp $ssh_custom_param $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
+sync_output=$(scp $ssh_custom_param "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
 
 if [ "$?" = "0" ]; then
-    echolor -G "Success - finished rsync synchronisation"
+    echolor -G "Success - finished scp synchronisation"
     echolor -G "See: $HTTP_DIRECTORY"
 else
     echolor -R "Warning $sync_output"
-    echolor -R 'ERROR - rsync failed'
+    echolor -R 'ERROR - scp failed'
     exit 1
 fi
 

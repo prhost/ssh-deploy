@@ -1,0 +1,48 @@
+version: '3.1'
+services:
+    deploy-rsync:
+        image: prhost/ssh-deploy:latest
+        entrypoint: ssh-deploy
+        environment:
+            HOST: domain.com
+            IP: 1.1.1.1
+            PORT: 22
+            SSHKEY_PRIVATE:
+                |
+                -----BEGIN RSA PRIVATE KEY-----
+                -----END RSA PRIVATE KEY-----
+            USER_HOST: user
+            PUBLIC_DIRECTORY: /var/www/html
+            SOURCE_DIR: /source-files
+#            DELETE: "true"
+            FILES: "file1.txt file2.txt path1/ path2/"
+
+    deploy-scp:
+        image: prhost/ssh-deploy:latest
+        entrypoint: scp-deploy
+        environment:
+            HOST: domain.com
+            IP: 1.1.1.1
+            PORT: 22
+            SSHKEY_PRIVATE:
+                |
+                -----BEGIN RSA PRIVATE KEY-----
+                -----END RSA PRIVATE KEY-----
+            USER_HOST: user
+            PUBLIC_DIRECTORY: /var/www/html
+            SOURCE_DIR: /source-files
+
+    exec-command:
+        image: prhost/ssh-deploy:latest
+        entrypoint: ssh-exec
+        environment:
+            HOST: domain.com
+            IP: 1.1.1.1
+            PORT: 22
+            SSHKEY_PRIVATE:
+                |
+                -----BEGIN RSA PRIVATE KEY-----
+                -----END RSA PRIVATE KEY-----
+            USER_HOST: user
+            PUBLIC_DIRECTORY: /var/www/html
+            EXEC_SCRIPT: "ls -la"

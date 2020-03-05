@@ -1,8 +1,6 @@
-FROM prhost/minimal-tools:latest
+FROM prhost/minimal-tools:beta
 
 MAINTAINER kallef Alexandre <kallef@orbitaldev.com.br>
-
-RUN apk add --update bash && rm -rf /var/cache/apk/*
 
 # install Echolor
 RUN git clone https://github.com/Gruppio/Echolor.git \
