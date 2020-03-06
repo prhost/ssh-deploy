@@ -58,7 +58,7 @@ if [ -n "$PORT" ];then
 fi
 echolor -C "remote_port: $remote_port"
 
-ssh_custom_param="-o stricthostkeychecking=no -r -P $remote_port -i $FILE_SSHKEY_PRIVATE"
+ssh_custom_param="-o stricthostkeychecking=no -r -P $remote_port -i $FILE_SSHKEY_PRIVATE -C"
 if [ -n "$SSH_CUSTOM_PARAMETER" ];then
     ssh_custom_param="$SSH_CUSTOM_PARAMETER"
     echo "SSH custom paramenters: $ssh_custom_param"
@@ -71,7 +71,6 @@ if [ -z "$SOURCE_DIR" ];then
 fi
 
 echolor -C "Arquivos local do projeto:"
-echolor -C "ls -la $SOURCE_DIR"
 ls -la $SOURCE_DIR
 echo ""
 
@@ -80,18 +79,49 @@ SOURCE_DIR="$SOURCE_DIR/"
 echolor -C "Adicionando chaves no known_hosts...\n"
 ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
 ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
+echo ""
+
+exclude_files=""
+if [ -n "$IGNORE_FILES" ];then
+    echolor -C "Ignorando arquivos:\n"
+    echo $IGNORE_FILES
+    echo ""
+    exclude_files=`echo "$IGNORE_FILES" | sed 's/[^ ]* */--exclude=&/g'`
+fi
+
+files_selected="./"
+if [ -n "$FILES" ];then
+    echolor -C "Arquivos selecionados:\n"
+    echo $FILES
+    echo ""
+    files_selected="$FILES"
+fi
+
+echolor -C "Comprimindo arquivos...\n"
+echo "cd $SOURCE_DIR && tar -cj $exclude_files deploy-files.tar.bz2 $files_selected"
+echo ""
+cd $SOURCE_DIR && tar -cj -C $SOURCE_DIR $exclude_files -f deploy-files.tar.bz2 $files_selected
 
 echolor -C "Run Scp...\n"
-echolor -C "scp $ssh_custom_param $SOURCE_DIR $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
-sync_output=$(scp $ssh_custom_param "$SOURCE_DIR" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
+echolor -C "scp $ssh_custom_param $SOURCE_DIR/deploy-files.tar.bz2 $USER_HOST@$HOST:$PUBLIC_DIRECTORY"
+echo ""
+scp_output=$(scp $ssh_custom_param "$SOURCE_DIR/deploy-files.tar.bz2" "$USER_HOST@$HOST:$PUBLIC_DIRECTORY")
+
+echolor -C "Descompactando arquivos...\n"
+echo ""
+export EXEC_SCRIPT="tar -xjf $PUBLIC_DIRECTORY/deploy-files.tar.bz2 -C $PUBLIC_DIRECTORY" && /scripts/ssh-exec
+
+echolor -C "Excluindo arquivo comprimido...\n"
+echo ""
+export EXEC_SCRIPT="rm -rf $PUBLIC_DIRECTORY/deploy-files.tar.bz2" && /scripts/ssh-exec
 
 if [ "$?" = "0" ]; then
     echolor -G "Success - finished scp synchronisation"
     echolor -G "See: $HTTP_DIRECTORY"
 else
-    echolor -R "Warning $sync_output"
+    echolor -R "Warning $scp_output"
     echolor -R 'ERROR - scp failed'
     exit 1
 fi
 
-rm -rf $FILE_SSHKEY_PRIVATE
+rm -rf $FILE_SSHKEY_PRIVATE $SOURCE_DIR/deploy-files.tar.bz2

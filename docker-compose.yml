@@ -31,6 +31,8 @@ services:
             USER_HOST: user
             PUBLIC_DIRECTORY: /var/www/html
             SOURCE_DIR: /source-files
+            FILES: "file1.txt file2.txt path1 path2"
+            IGNORE_FILES: ".git .gitignore"
 
     exec-command:
         image: prhost/ssh-deploy:latest

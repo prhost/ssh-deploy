@@ -11,7 +11,7 @@ if [ -z "$SSHKEY_PRIVATE" ] ; then echo 'ERROR - missing variable SSHKEY_PRIVATE
 if [ -z "$USER_HOST" ] ; then echo 'ERROR - missing variable USER_HOST' && exit 1 ; fi
 echo "USER_HOST: $USER_HOST"
 
-if [ -z "$EXEC_SCRIPT" ] ; then echo 'ERROR - missing host (EXEC_SCRIPT) option' && exit 1 ; fi
+if [ -z "$EXEC_SCRIPT" ] ; then echo 'ERROR - missing variable (EXEC_SCRIPT) option' && exit 1 ; fi
 echo "EXEC_SCRIPT: $EXEC_SCRIPT"
 
 remote_user="$USER_HOST"
