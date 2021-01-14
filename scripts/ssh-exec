@@ -55,7 +55,7 @@ fi
 
 echo "Testing ssh connection..."
 
-TEST_SSH="ssh  $remote_user@$HOST -o 'BatchMode=yes' -o 'ConnectionAttempts=1' -p $remote_port -i $FILE_SSHKEY_PRIVATE' true"
+TEST_SSH="ssh  $remote_user@$HOST -o 'BatchMode=yes' -o 'ConnectionAttempts=1' -p $remote_port -i $FILE_SSHKEY_PRIVATE true"
 
 echo $TEST_SSH
 $TEST_SSH
