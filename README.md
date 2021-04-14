@@ -31,6 +31,9 @@ Execute remote command:
     - ssh-exec
 ```
 
+***O comando `ssh-deploy` necessita de RSYNC do lado do servidor remoto.***
+***Também existe o comando `scp-deploy` que pode ser usado no lugar do `ssh-deploy`. É usado mais quando não se tem RSYNC e não pode ser instalado (no caso de hospedagens compartilhadas).***
+
 ### Pacotes usados
 
 * https://github.com/Gruppio/Echolor
