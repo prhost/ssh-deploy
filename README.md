@@ -2,7 +2,7 @@
 
 ## Exemplo de uso no Gitlab CI
 
-```
+```yaml
 Upload files:
   image: "prhost/ssh-deploy"
   variables:
