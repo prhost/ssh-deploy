@@ -28,8 +28,8 @@ if [ -n "$PORT" ];then
 fi
 echo "remote_port: $remote_port"
 
-ssh-keyscan $HOST >> ~/.ssh/known_hosts &> /dev/null
-ssh-keyscan $IP >> ~/.ssh/known_hosts &> /dev/null
+ssh-keyscan -p $remote_port $HOST >> ~/.ssh/known_hosts &> /dev/null
+ssh-keyscan -p $remote_port $IP >> ~/.ssh/known_hosts &> /dev/null
 
 FILE_SSHKEY_PRIVATE=~/.ssh/ssh_key_private.key
 echo "FILE_SSHKEY_PRIVATE: $FILE_SSHKEY_PRIVATE"
